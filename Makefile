@@ -3,11 +3,11 @@ VER=$(shell grep Version packageinfo/control | cut -c 10-)
 IPK_NAME=frc${YEAR}-libzmq_${VER}_cortexa9-vfpv3.ipk
 DOCKER_IMAGE=roborio-cross-${YEAR}-t195
 
-ipk: ${IPK_NAME}
+ipk: build/${IPK_NAME}
 	
-libzmq: libzmq_${VER}.so
+libzmq: build/libzmq_${VER}.so
 
-libzmq_${VER}.so:
+build/libzmq_${VER}.so:
 	mkdir -p build
 	docker run --rm -v ${PWD}/build:/artifacts ${DOCKER_IMAGE} /bin/bash -c '\
 		curl -SLO https://github.com/zeromq/libzmq/releases/download/v${VER}/zeromq-${VER}.tar.gz \
@@ -28,13 +28,16 @@ clean:
 		&& rm -f debian-binary \
 		&& rm -f ${IPK_NAME} '
 	
-${IPK_NAME}: libzmq_${VER}.so
+build/${IPK_NAME}: build/libzmq_${VER}.so
 	docker run --rm -v ${PWD}/build:/artifacts -v ${PWD}/packageinfo:/packageinfo ${DOCKER_IMAGE} /bin/bash -c '\
 		cd /artifacts \
 		&& chmod 775 -R ./ \
 		&& tar cvJf data.tar.xz --transform "s,^artifacts,usr/lib," --show-transformed-names --exclude=\*.diz --owner=root --group=root /artifacts/*.so || true \
 		&& tar czf control.tar.gz /packageinfo/control /packageinfo/postinst /packageinfo/prerm || true \
 		&& echo 2.0 > debian-binary \
-		&& /usr/local/arm-frc${YEAR}-linux-gnueabi/bin/ar r %IPK_NAME% control.tar.gz data.tar.xz debian-binary'
+		&& /usr/local/arm-frc${YEAR}-linux-gnueabi/bin/ar r ${IPK_NAME} control.tar.gz data.tar.xz debian-binary \
+		&& rm -f /artifacts/control.tar.gz \
+		&& rm -f /artifacts/data.tar.xz \
+		&& rm -f /artifacts/debian-binary'
 	
 include buildenv/Makefile
