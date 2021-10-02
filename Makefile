@@ -17,18 +17,16 @@ libzmq_${VER}.so:
 		&& make -j4 \
 		&& chown -R `id -u`:`id -g` src/.libs/libzmq.so \
 		&& arm-frc${YEAR}-linux-gnueabi-strip src/.libs/libzmq.so \
-		&& cp src/.libs/libzmq.so /artifacts/libzmq.so
-	'
+		&& cp src/.libs/libzmq.so /artifacts/libzmq_${VER}.so'
 	
 clean:
 	docker run --rm -v ${PWD}/build:/artifacts ${DOCKER_IMAGE} /bin/bash -c '\
 		cd /artifacts \
-		&& rm -f libzmq.so \
+		&& rm -f libzmq_${VER}.so \
 		&& rm -f control.tar.gz \
 		&& rm -f data.tar.gz \
 		&& rm -f debian-binary \
-		&& rm -f ${IPK_NAME} \
-	'
+		&& rm -f ${IPK_NAME} '
 	
 ${IPK_NAME}: libzmq_${VER}.so
 	docker run --rm -v ${PWD}/build:/artifacts -v ${PWD}/packageinfo:/packageinfo ${DOCKER_IMAGE} /bin/bash -c '\
@@ -37,7 +35,6 @@ ${IPK_NAME}: libzmq_${VER}.so
 		&& tar cvJf data.tar.xz --transform "s,^artifacts,usr/lib," --show-transformed-names --exclude=\*.diz --owner=root --group=root /artifacts/*.so || true \
 		&& tar czf control.tar.gz /packageinfo/control /packageinfo/postinst /packageinfo/prerm || true \
 		&& echo 2.0 > debian-binary \
-		&& /usr/local/arm-frc${YEAR}-linux-gnueabi/bin/ar r %IPK_NAME% control.tar.gz data.tar.xz debian-binary
-	'
+		&& /usr/local/arm-frc${YEAR}-linux-gnueabi/bin/ar r %IPK_NAME% control.tar.gz data.tar.xz debian-binary'
 	
 include buildenv/Makefile
