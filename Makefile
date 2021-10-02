@@ -39,5 +39,6 @@ build/${IPK_NAME}: build/libzmq_${VER}.so
 		&& rm -f /artifacts/control.tar.gz \
 		&& rm -f /artifacts/data.tar.xz \
 		&& rm -f /artifacts/debian-binary'
+	cp build/${IPK_NAME} ${IPK_NAME}
 	
 include buildenv/Makefile
