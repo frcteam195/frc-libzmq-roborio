@@ -13,7 +13,7 @@ build/libzmq_${VER}.so:
 		curl -SLO https://github.com/zeromq/libzmq/releases/download/v${VER}/zeromq-${VER}.tar.gz \
 		&& tar xzf zeromq-${VER}.tar.gz \
 		&& cd zeromq-${VER} \
-		&& ./configure --host=arm-frc${YEAR}-linux-gnueabi CC=arm-frc${YEAR}-linux-gnueabi-gcc CXX=arm-frc${YEAR}-linux-gnueabi-g++ \
+		&& ./configure --enable-drafts --host=arm-frc${YEAR}-linux-gnueabi CC=arm-frc${YEAR}-linux-gnueabi-gcc CXX=arm-frc${YEAR}-linux-gnueabi-g++ \
 		&& make -j4 \
 		&& chown -R `id -u`:`id -g` src/.libs/libzmq.so \
 		&& arm-frc${YEAR}-linux-gnueabi-strip src/.libs/libzmq.so \
